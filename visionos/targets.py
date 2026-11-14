@@ -641,6 +641,24 @@ TARGETS = {
         "product": "KleptonPortalVR",
         "display": "Portal",
     },
+    #   GoldenEye VR (com.gevr.port): SDL2 SDLActivity + OpenXR + GLES 3 multiview,
+    # entry libgevr (SDL_main). Data: userdata/gevr/files -> android-files/files
+    # (the player's ROM, ini and saves, in getExternalFilesDir(null)/data; the game
+    # takes the folder and its OpenXR context from SDL, no MainActivity calls).
+    "gevr": {
+        "libs":    None,
+        "srcdir":  "gevr/lib/arm64-v8a",
+        "tree":    "gevr",
+        "apk":     "gevr.apk",
+        "assets":  "gevr/assets",
+        "qtplugins": "",
+        "obb":     "obb",
+        "stage_files": "files",
+        "entry":   "libgevr",
+        "kind":    "sdl2",
+        "product": "KleptonGoldenEyeVR",
+        "display": "GoldenEye VR",
+    },
 }
 
 DEFAULT = "beatsaber"

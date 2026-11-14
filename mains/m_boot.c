@@ -55,6 +55,7 @@ static const kl_target *TARGET;
 static const char *LIBDIR;
 static kl_slink_door DOOR;          // read only by a Steam Link target
 #define DOOR_IS_VR (TARGET->kind == KL_GUEST_STEAMLINK && DOOR == KL_SLINK_VR)
+#define SDL2_PUMP (TARGET->kind == KL_GUEST_SDL2 && getenv("KL_SDL2_PUMP"))
 
 static int fail(const char *msg) { fprintf(stderr, "FAIL: %s\n", msg); return 1; }
 
@@ -604,7 +605,7 @@ static int begin_and_pump(int view_pump) {
     // inside its lifecycle (ovrp_SetupEyeTexture2 arrives there); an Unreal
     // guest needs no provider at all, its eye images come from MoltenVK. Self-
     // guarding on KL_GLFB_MTL / KL_VIEW, so a plain run is unchanged.
-    if (TARGET->kind == KL_GUEST_JKXR || DOOR_IS_VR) kl_mtl_provider_install();
+    if (TARGET->kind == KL_GUEST_JKXR || DOOR_IS_VR || SDL2_PUMP) kl_mtl_provider_install();
 
     // The same layer policy the device app applies, and for the same reasons —
     // Steam Link's VR door stacks projection layers and streams FOVEATED, so the
@@ -705,6 +706,10 @@ static int recon_run(int view_pump) {
     if (TARGET->kind == KL_GUEST_STEAMLINK) return steamlink_run(view_pump);
     if (TARGET->kind == KL_GUEST_UE4 || TARGET->kind == KL_GUEST_JKXR)
         return native_door_run(view_pump);
+    // KL_SDL2_PUMP=1: an SDL2 guest whose OpenXR session starts on its own
+    // nativeRunMain thread (GoldenEye VR) runs the native door's begin + pump
+    // for KL_NATIVE_WAIT seconds, with a VR door's eye-texture provider.
+    if (SDL2_PUMP) return native_door_run(view_pump);
 
     if (kl_driver_boot(stdout) != 0) return fail(kl_driver_error());
 
