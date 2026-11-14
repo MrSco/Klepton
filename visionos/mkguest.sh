@@ -74,6 +74,10 @@ for NAME in $LIBS; do
     mkdir -p "$FW"
     "$LD" "$SRC/$NAME.so" -o "$FW/$FWNAME" --platform "$KLPLAT" \
           --install-name "@rpath/$FWNAME.framework/$FWNAME" --quiet
+    # Ad-hoc signed here: a simulator build embeds it without signing it, and the
+    # visionOS 27 simulator refuses an unsigned library ("Trying to load an
+    # unsigned library"). A device build re-signs it with the team on copy.
+    codesign -s - -f "$FW/$FWNAME" 2>/dev/null
     cat > "$FW/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
